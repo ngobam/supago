@@ -7,12 +7,11 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Go-1.21+-00ADD8?logo=go&logoColor=white" />
   <img src="https://img.shields.io/badge/Supabase-Ready-3ECF8E?logo=supabase&logoColor=white" />
-  <img src="https://img.shields.io/badge/Gin-Framework-00ADD8?logo=gin&logoColor=white" />
 </p>
 
 
 ## Introduction
-Supago provides proxy layer between your applications and Supabase.
+Supago is a CLI tool that provides a proxy layer between your applications and Supabase.
 
 ## Features
 *_under construction_*
@@ -56,5 +55,5 @@ supago/
 
 ## Run
 ```bash
-go run cmd/main.go
+go run cmd/main.go server
 ```
