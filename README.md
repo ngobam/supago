@@ -1,8 +1,14 @@
 # Supago
 
-![Go Version](https://img.shields.io/badge/Go-1.21+-00ADD8?logo=go&logoColor=white)
-![Supabase](https://img.shields.io/badge/Supabase-Ready-3ECF8E?logo=supabase&logoColor=white)
-![Gin](https://img.shields.io/badge/Gin-Framework-00ADD8?logo=gin&logoColor=white)
+<div align="center">
+    <img src="https://media.tenor.com/Uxz5-w-2uaIAAAAi/hmm-penguin.gif"/>
+</div>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Go-1.21+-00ADD8?logo=go&logoColor=white" />
+  <img src="https://img.shields.io/badge/Supabase-Ready-3ECF8E?logo=supabase&logoColor=white" />
+  <img src="https://img.shields.io/badge/Gin-Framework-00ADD8?logo=gin&logoColor=white" />
+</p>
 
 
 ## Introduction
