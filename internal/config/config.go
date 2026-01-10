@@ -6,9 +6,14 @@ import (
 	"github.com/spf13/viper"
 )
 
+var AppConfig *Config
+
 type Config struct {
 	ServerHost               string `mapstructure:"SERVER_HOST"`
 	ServerPort               string `mapstructure:"SERVER_PORT"`
+	SupabaseProjectId        string `mapstructure:"SUPABASE_PROJECT_ID"`
+	SupabaseApiKey           string `mapstructure:"SUPABASE_API_KEY"`
+	SupabaseAnonKey          string `mapstructure:"SUPABASE_ANON_KEY"`
 	MaxServerRequestBodySize int    `mapstructure:"MAX_SERVER_REQUEST_BODY_SIZE"`
 }
 
@@ -35,9 +40,14 @@ func LoadConfig(path *string) (*Config, error) {
 		cfg.ServerPort = ":" + cfg.ServerPort
 	}
 
-	return &cfg, nil
+	AppConfig = &cfg
+	return AppConfig, nil
 }
 
 func (c *Config) Address() string {
 	return fmt.Sprintf("%s%s", c.ServerHost, c.ServerPort)
+}
+
+func (c *Config) SupabaseUrl() string {
+	return fmt.Sprintf("https://%s.supabase.co", c.SupabaseProjectId)
 }
