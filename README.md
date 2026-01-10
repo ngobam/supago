@@ -9,7 +9,6 @@
   <img src="https://img.shields.io/badge/Supabase-Ready-3ECF8E?logo=supabase&logoColor=white" />
 </p>
 
-
 ## Introduction
 Supago is a CLI tool that provides a proxy layer between your applications and Supabase.
 
