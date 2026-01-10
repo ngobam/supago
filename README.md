@@ -10,7 +10,7 @@
 </p>
 
 ## Introduction
-Supago is a CLI based tool that provides a proxy layer between your applications and Supabase.
+Supago is a CLI tool that provides a proxy layer between your applications and Supabase.
 
 ## Features
 *_under construction_*
