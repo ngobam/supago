@@ -52,11 +52,6 @@ supago/
 └── README.md
 
 ```
-## Features
-
-- Secure API proxy
-- Clean Architecture
-- Gin based HTTP server
 
 ## Run
 ```bash
