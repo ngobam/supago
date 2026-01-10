@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/rosfandy/supago/pkg/supabase/drivers"
+	"github.com/rosfandy/supago/pkg/supabase/function"
 )
 
 type ColumnSchema struct {
@@ -30,70 +31,6 @@ func NewTableSchemaQuery(d *drivers.Supabase) *SupabaseQuery {
 	}
 }
 
-// Query builder methods untuk SupabaseQuery
-func (sq *SupabaseQuery) From(tableName string) *SupabaseQuery {
-	baseUrl := sq.Url
-	if idx := strings.Index(sq.Url, "/rest/v1/"); idx != -1 {
-		baseUrl = sq.Url[:idx]
-	}
-
-	sq.Url = fmt.Sprintf("%s/rest/v1/%s", baseUrl, tableName)
-	return sq
-}
-
-func (sq *SupabaseQuery) Select(columns string) *SupabaseQuery {
-	if sq.Url == "" {
-		return sq
-	}
-
-	separator := sq.getSeparator()
-	sq.Url = fmt.Sprintf("%s%sselect=%s", sq.Url, separator, columns)
-	return sq
-}
-
-func (sq *SupabaseQuery) Eq(column, value string) *SupabaseQuery {
-	if sq.Url == "" {
-		return sq
-	}
-
-	separator := sq.getSeparator()
-	sq.Url = fmt.Sprintf("%s%s%s=eq.%s", sq.Url, separator, column, value)
-	return sq
-}
-
-func (sq *SupabaseQuery) Order(column string, ascending bool) *SupabaseQuery {
-	if sq.Url == "" {
-		return sq
-	}
-
-	separator := sq.getSeparator()
-	direction := "desc"
-	if ascending {
-		direction = "asc"
-	}
-
-	sq.Url = fmt.Sprintf("%s%sorder=%s.%s", sq.Url, separator, column, direction)
-	return sq
-}
-
-func (sq *SupabaseQuery) RPC(functionName string, params interface{}) *SupabaseQuery {
-	baseUrl := sq.Url
-	if idx := strings.Index(sq.Url, "/rest/v1/"); idx != -1 {
-		baseUrl = sq.Url[:idx]
-	}
-
-	sq.Url = fmt.Sprintf("%s/rest/v1/rpc/%s", baseUrl, functionName)
-	sq.Payload = params
-	return sq
-}
-
-func (sq *SupabaseQuery) getSeparator() string {
-	if strings.Contains(sq.Url, "?") {
-		return "&"
-	}
-	return "?"
-}
-
 // Helper method untuk clone instance dengan headers
 func (sq *SupabaseQuery) clone() *SupabaseQuery {
 	newHeaders := make(map[string]string)
@@ -105,6 +42,7 @@ func (sq *SupabaseQuery) clone() *SupabaseQuery {
 		Supabase: &drivers.Supabase{
 			Url:     sq.Url,
 			Headers: newHeaders,
+			Config:  sq.Config,
 		},
 	}
 }
@@ -114,23 +52,20 @@ func (s *SupabaseQuery) GetTableSchema(tableName *string) (*TableSchemaResult, e
 		return nil, fmt.Errorf("table name cannot be empty")
 	}
 
-	// Check if schema view exists
 	exists, err := s.checkSchemaViewExists(tableName)
 	if err != nil {
-		return nil, fmt.Errorf("failed to check schema view: %w", err)
+		return nil, err
 	}
 
-	// If view doesn't exist, create it
 	if !exists {
 		if err := s.createSchemaView(tableName); err != nil {
-			return nil, fmt.Errorf("failed to create schema view: %w", err)
+			return nil, err
 		}
 	}
 
-	// Get schema from view
 	columns, err := s.getSchemaFromView(tableName)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get schema: %w", err)
+		return nil, err
 	}
 
 	result := &TableSchemaResult{
@@ -144,52 +79,51 @@ func (s *SupabaseQuery) GetTableSchema(tableName *string) (*TableSchemaResult, e
 func (s *SupabaseQuery) checkSchemaViewExists(tableName *string) (bool, error) {
 	viewName := *tableName + "_schema"
 
-	// Langsung coba query ke view, jika 404 berarti belum ada
 	sq := s.clone()
 	_, err := sq.From(viewName).
 		Select("column_name,data_type,is_nullable,column_default").
 		Read()
 
 	if err != nil {
-		// Jika error 404 atau "Could not find", view belum ada
 		if strings.Contains(err.Error(), "404") || strings.Contains(err.Error(), "Could not find") {
 			return false, nil
 		}
-		// Error lain
 		return false, err
 	}
 
-	// Jika tidak error, view exists
 	return true, nil
 }
 
-// createSchemaView creates a view for table schema
+// createSchemaView creates a view for table schema using Management API
 func (s *SupabaseQuery) createSchemaView(tableName *string) error {
 	viewName := *tableName + "_schema"
 
 	createViewSQL := fmt.Sprintf(`
-		CREATE OR REPLACE VIEW public.%s AS
-		SELECT
-			column_name,
-			data_type,
-			(is_nullable = 'YES')::boolean as is_nullable,
-			COALESCE(column_default, '') as column_default
-		FROM information_schema.columns
-		WHERE table_schema = 'public'
-		  AND table_name = '%s'
-		ORDER BY ordinal_position;
-		
-		GRANT SELECT ON public.%s TO anon, authenticated;
+CREATE OR REPLACE VIEW public.%s AS
+SELECT
+	column_name,
+	data_type,
+	(is_nullable = 'YES')::boolean as is_nullable,
+	COALESCE(column_default, '') as column_default
+FROM information_schema.columns
+WHERE table_schema = 'public'
+  AND table_name = '%s'
+ORDER BY ordinal_position;
+
+GRANT SELECT ON public.%s TO anon, authenticated;
 	`, viewName, *tableName, viewName)
 
-	params := map[string]interface{}{
-		"query": createViewSQL,
+	sq := s.clone()
+	body, err := sq.ExecuteSQL(createViewSQL)
+	if err != nil {
+		return fmt.Errorf("failed to create view via Management API: %w", err)
 	}
 
-	sq := s.clone()
-	_, err := sq.RPC("exec_sql", params).Write()
-	if err != nil {
-		return fmt.Errorf("failed to create view via RPC: %w", err)
+	// Parse response
+	var result []map[string]interface{}
+	if err := json.Unmarshal(body, &result); err != nil {
+		// Management API might return different response format
+		fmt.Println("View creation response:", string(body))
 	}
 
 	return nil
@@ -248,18 +182,14 @@ func (s *SupabaseQuery) GetAllTableSchemas() ([]TableSchemaResult, error) {
 	return results, nil
 }
 
-// DropSchemaView drops a schema view if it exists
+// DropSchemaView drops a schema view if it exists using Management API
 func (s *SupabaseQuery) DropSchemaView(tableName *string) error {
 	viewName := *tableName + "_schema"
 
 	dropSQL := fmt.Sprintf("DROP VIEW IF EXISTS public.%s CASCADE;", viewName)
 
-	params := map[string]interface{}{
-		"query": dropSQL,
-	}
-
 	sq := s.clone()
-	_, err := sq.RPC("exec_sql", params).Write()
+	_, err := sq.ExecuteSQL(dropSQL)
 	if err != nil {
 		return fmt.Errorf("failed to drop view: %w", err)
 	}
@@ -269,7 +199,6 @@ func (s *SupabaseQuery) DropSchemaView(tableName *string) error {
 
 // RefreshSchemaView recreates the schema view
 func (s *SupabaseQuery) RefreshSchemaView(tableName *string) error {
-	// Drop existing view
 	if err := s.DropSchemaView(tableName); err != nil {
 		return err
 	}
@@ -322,7 +251,6 @@ func (s *SupabaseQuery) GetTableInfo(tableName *string) (*TableSchemaResult, err
 		return nil, fmt.Errorf("table name cannot be empty")
 	}
 
-	// Query information_schema.columns directly
 	sq := s.clone()
 	body, err := sq.From("information_schema.columns").
 		Select("column_name,data_type,is_nullable,column_default").
@@ -335,7 +263,6 @@ func (s *SupabaseQuery) GetTableInfo(tableName *string) (*TableSchemaResult, err
 		return nil, err
 	}
 
-	// Parse columns - need to handle is_nullable as string first
 	var rawColumns []struct {
 		ColumnName    string  `json:"column_name"`
 		DataType      string  `json:"data_type"`
@@ -347,7 +274,6 @@ func (s *SupabaseQuery) GetTableInfo(tableName *string) (*TableSchemaResult, err
 		return nil, fmt.Errorf("failed to parse columns: %w", err)
 	}
 
-	// Convert to ColumnSchema
 	columns := make([]ColumnSchema, len(rawColumns))
 	for i, raw := range rawColumns {
 		columns[i] = ColumnSchema{
@@ -367,4 +293,155 @@ func (s *SupabaseQuery) GetTableInfo(tableName *string) (*TableSchemaResult, err
 	}
 
 	return result, nil
+}
+
+// CheckFunctionExists checks if a given RPC function exists (legacy method)
+// Note: This is unreliable and kept for backward compatibility
+func (s *SupabaseQuery) CheckFunctionExists(functionName string) (bool, error) {
+	params := map[string]interface{}{}
+	sq := s.clone()
+	_, err := sq.RPC(functionName, params).Write()
+	if err != nil && strings.Contains(err.Error(), "Could not find the function") {
+		return false, nil
+	} else if err != nil {
+		// Other error, assume function exists or network issue
+		return true, nil
+	}
+	return true, nil
+}
+
+// CheckFunctionExistsInDB checks if a function exists by querying pg_catalog
+// This is the recommended way to check function existence
+func (s *SupabaseQuery) CheckFunctionExistsInDB(functionName string) (bool, error) {
+	query := fmt.Sprintf(`
+		SELECT COUNT(*) > 0 as exists
+		FROM pg_catalog.pg_proc p
+		JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
+		WHERE p.proname = '%s'
+		AND n.nspname = 'public'
+	`, functionName)
+
+	type ExistsResult struct {
+		Exists bool `json:"exists"`
+	}
+
+	sq := s.clone()
+	body, err := sq.RPC("exec_sql", map[string]interface{}{"query": query}).Write()
+
+	if err != nil {
+		if strings.Contains(err.Error(), "Could not find the function") {
+			return s.checkFunctionViaManagementAPI(functionName)
+		}
+		return s.checkFunctionViaManagementAPI(functionName)
+	}
+
+	if len(body) == 0 || string(body) == "null" || string(body) == "[]" {
+		// exec_sql exists but returns void, fallback to Management API
+		return s.checkFunctionViaManagementAPI(functionName)
+	}
+
+	var results []ExistsResult
+	if err := json.Unmarshal(body, &results); err != nil {
+		return s.checkFunctionViaManagementAPI(functionName)
+	}
+
+	if len(results) > 0 {
+		return results[0].Exists, nil
+	}
+
+	return false, nil
+}
+
+// checkFunctionViaManagementAPI checks function existence via Management API
+func (s *SupabaseQuery) checkFunctionViaManagementAPI(functionName string) (bool, error) {
+	// Try a simpler approach: list all functions and check if ours exists
+	query := `
+		SELECT p.proname as function_name
+		FROM pg_catalog.pg_proc p
+		JOIN pg_catalog.pg_namespace n ON n.oid = p.pronamespace
+		WHERE n.nspname = 'public'
+	`
+
+	sq := s.clone()
+	body, err := sq.ExecuteSQL(query)
+	if err != nil {
+		return false, err
+	}
+
+	if len(body) == 0 || string(body) == "[]" {
+		return false, nil
+	}
+
+	var results []map[string]interface{}
+	if err := json.Unmarshal(body, &results); err != nil {
+		fmt.Printf("Debug: Failed to parse response: %s\n", string(body))
+		return false, nil
+	}
+
+	for _, result := range results {
+		if fname, ok := result["function_name"].(string); ok {
+			if fname == functionName {
+				return true, nil
+			}
+		}
+	}
+
+	return false, nil
+}
+
+// CreateTableSchemaFunction creates the create_table_schema_view function using Management API
+func (s *SupabaseQuery) CreateTableSchemaFunction() error {
+	sq := s.clone()
+	body, err := sq.ExecuteSQL(function.GetTableSchemaSQL)
+	if err != nil {
+		return fmt.Errorf("failed to create function via Management API: %w", err)
+	}
+
+	fmt.Println("Function created successfully:", string(body))
+	return nil
+}
+
+// CreateExecSQLFunction creates exec_sql function using Management API
+func (s *SupabaseQuery) CreateExecSQLFunction() error {
+	sq := s.clone()
+	body, err := sq.ExecuteSQL(function.ExecSQL)
+	if err != nil {
+		return fmt.Errorf("failed to create exec_sql function: %w", err)
+	}
+
+	fmt.Println("exec_sql function created successfully:", string(body))
+	return nil
+}
+
+// InitializeDatabase creates all necessary functions and views
+func (s *SupabaseQuery) InitializeDatabase() error {
+	fmt.Println("Initializing database functions...")
+
+	if err := s.CreateExecSQLFunction(); err != nil {
+		fmt.Printf("Warning: failed to create exec_sql function: %v\n", err)
+	}
+
+	if err := s.CreateTableSchemaFunction(); err != nil {
+		return fmt.Errorf("failed to create schema function: %w", err)
+	}
+
+	fmt.Println("Database initialization completed successfully!")
+	return nil
+}
+
+// InitializeDatabaseSelective creates only missing database functions
+func (s *SupabaseQuery) InitializeDatabaseSelective(schemaViewExists, execSqlExists bool) error {
+	if !execSqlExists {
+		if err := s.CreateExecSQLFunction(); err != nil {
+			fmt.Printf("Warning: failed to create exec_sql function: %v\n", err)
+		}
+	}
+
+	if !schemaViewExists {
+		if err := s.CreateTableSchemaFunction(); err != nil {
+			return fmt.Errorf("failed to create schema function: %w", err)
+		}
+	}
+
+	return nil
 }

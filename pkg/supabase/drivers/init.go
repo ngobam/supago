@@ -15,6 +15,7 @@ type Supabase struct {
 	Query   string
 	Payload interface{}
 	Headers map[string]string
+	Config  *config.Config
 }
 
 func NewSupabase(c *config.Config) *Supabase {
@@ -25,6 +26,7 @@ func NewSupabase(c *config.Config) *Supabase {
 			"Authorization": fmt.Sprintf("Bearer %s", c.SupabaseAnonKey),
 			"Content-Type":  "application/json",
 		},
+		Config: c,
 	}
 }
 
@@ -86,7 +88,6 @@ func (s *Supabase) Write() ([]byte, error) {
 func (s *Supabase) Update() ([]byte, error) {
 	var reqBody io.Reader
 
-	// Marshal payload if provided
 	if s.Payload != nil {
 		jsonData, err := json.Marshal(s.Payload)
 		if err != nil {
@@ -100,7 +101,6 @@ func (s *Supabase) Update() ([]byte, error) {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
 
-	// Set headers
 	for key, value := range s.Headers {
 		req.Header.Set(key, value)
 	}
@@ -114,10 +114,34 @@ func (s *Supabase) Delete() ([]byte, error) {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
 
-	// Set headers
 	for key, value := range s.Headers {
 		req.Header.Set(key, value)
 	}
+
+	return commit(req)
+}
+
+// ExecuteSQL executes raw SQL via Management API
+func (s *Supabase) ExecuteSQL(query string) ([]byte, error) {
+	url := fmt.Sprintf("%s/database/query", s.Config.SupabaseManagementUrl())
+
+	payload := map[string]interface{}{
+		"query": query,
+	}
+
+	jsonData, err := json.Marshal(payload)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal payload: %w", err)
+	}
+
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	// Use Personal Access Token for Management API
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", s.Config.SupabaseAccessToken))
+	req.Header.Set("Content-Type", "application/json")
 
 	return commit(req)
 }

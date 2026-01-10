@@ -14,6 +14,7 @@ type Config struct {
 	SupabaseProjectId        string `mapstructure:"SUPABASE_PROJECT_ID"`
 	SupabaseApiKey           string `mapstructure:"SUPABASE_API_KEY"`
 	SupabaseAnonKey          string `mapstructure:"SUPABASE_ANON_KEY"`
+	SupabaseAccessToken      string `mapstructure:"SUPABASE_ACCESS_TOKEN"` // Tambah ini
 	MaxServerRequestBodySize int    `mapstructure:"MAX_SERVER_REQUEST_BODY_SIZE"`
 }
 
@@ -50,4 +51,8 @@ func (c *Config) Address() string {
 
 func (c *Config) SupabaseUrl() string {
 	return fmt.Sprintf("https://%s.supabase.co", c.SupabaseProjectId)
+}
+
+func (c *Config) SupabaseManagementUrl() string {
+	return fmt.Sprintf("https://api.supabase.com/v1/projects/%s", c.SupabaseProjectId)
 }

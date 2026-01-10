@@ -5,7 +5,9 @@ import (
 )
 
 func (s *Supabase) From(tableName string) *Supabase {
-	s.Url = fmt.Sprintf("%s/rest/v1/%s", s.Url, tableName)
+	// Reset URL to REST API base
+	baseUrl := s.Config.SupabaseUrl()
+	s.Url = fmt.Sprintf("%s/rest/v1/%s", baseUrl, tableName)
 	return s
 }
 
@@ -153,10 +155,12 @@ func (s *Supabase) Single() *Supabase {
 	return s
 }
 
-// RPC calls a Supabase RPC function
+// RPC calls a Supabase RPC function via REST API
 func (s *Supabase) RPC(functionName string, params interface{}) *Supabase {
-	s.Url = fmt.Sprintf("%s/rest/v1/rpc/%s", s.Url, functionName)
+	baseUrl := s.Config.SupabaseUrl()
+	s.Url = fmt.Sprintf("%s/rest/v1/rpc/%s", baseUrl, functionName)
 	s.Payload = params
+	s.Headers["Authorization"] = fmt.Sprintf("Bearer %s", s.Config.SupabaseApiKey)
 	return s
 }
 

@@ -13,7 +13,8 @@
 Supago is a CLI tool that provides a proxy layer between your applications and Supabase.
 
 ## Features
-*_under construction_*
+- Execute Query (Database as Code)
+- Pull Supabase Table Schema
 
 ## Project Structure
 ```md
@@ -53,12 +54,7 @@ supago/
 ```
 
 ## Run
-Run Server
-```bash
-go run cmd/main.go server
-```
-
-Available Command
+### Available Command
 ```bash
 go run cmd/main.go help
 ```
@@ -78,4 +74,45 @@ Flags:
   -h, --help   help for supago
 
 Use "supago [command] --help" for more information about a command.
+```
+
+### Run Server
+```bash
+go run cmd/main.go server
+```
+
+### Pull Model
+```bash
+go run cmd/main.go pull -h                                                                          
+
+Pull table schema from Supabase and display column information
+
+Usage:
+  supago pull <table_name> [flags]
+  supago pull [command]
+
+Examples:
+supago pull blogs
+
+Available Commands:
+  check       Check database setup
+  setup       Setup database functions
+
+Flags:
+  -h, --help   help for pull
+
+```
+
+```bash
+go run cmd/main.go pull profiles                                                                    
+
+Table: profiles
+Columns:
+  • id                   uuid            NOT NULL   default: -
+  • username             text            NULL       default: -
+  • full_name            text            NULL       default: -
+  • avatar_url           text            NULL       default: -
+  • bio                  text            NULL       default: -
+  • created_at           timestamp with time zone NULL       default: now()
+  • updated_at           timestamp with time zone NULL       default: now()
 ```

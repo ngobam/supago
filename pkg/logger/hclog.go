@@ -2,7 +2,6 @@ package logger
 
 import (
 	"os"
-	"time"
 
 	"github.com/hashicorp/go-hclog"
 )
@@ -11,11 +10,11 @@ var instance hclog.Logger
 
 func HcLog() hclog.Logger {
 	if instance == nil {
-		instance = hclog.New(&hclog.LoggerOptions{
-			Level:           hclog.Trace,
-			Color:           hclog.ForceColor,
-			ColorHeaderOnly: true,
-			TimeFormat:      time.RFC3339,
+		instance = hclog.NewInterceptLogger(&hclog.LoggerOptions{
+			Name:   "supago",
+			Level:  hclog.Trace,
+			Color:  hclog.ForceColor,
+			Output: os.Stderr,
 		})
 	}
 
