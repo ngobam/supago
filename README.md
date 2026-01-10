@@ -15,12 +15,7 @@
 Supago provides proxy layer between your applications and Supabase.
 
 ## Features
-- 🔒 **Secure API Proxy** - Hide Supabase credentials and control access
-- 🏗️ **Clean Architecture** - Separation of concerns with clear boundaries
-- ⚡ **High Performance** - Built on Gin framework for fast HTTP routing
-- 🔧 **Easy Configuration** - Environment-based configuration management
-- 📦 **Modular Design** - Easily extendable and maintainable codebase
-- 🧪 **Testable** - Architecture designed for comprehensive unit testing
+*_under construction_*
 
 ## Project Structure
 ```md
