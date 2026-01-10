@@ -53,6 +53,29 @@ supago/
 ```
 
 ## Run
+Run Server
 ```bash
 go run cmd/main.go server
+```
+
+Available Command
+```bash
+go run cmd/main.go help
+```
+```bash
+Supago CLI
+
+Usage:
+  supago [command]
+
+Available Commands:
+  completion  Generate the autocompletion script for the specified shell
+  help        Help about any command
+  pull        Pull Supabase Model
+  server      Start Supago server
+
+Flags:
+  -h, --help   help for supago
+
+Use "supago [command] --help" for more information about a command.
 ```
