@@ -4,5 +4,5 @@ MAX_SERVER_REQUEST_BODY_SIZE: 1024
 
 SUPABASE_PROJECT_ID: ""
 SUPABASE_API_KEY: ""
+SUPABASE_ACCESS_TOKEN: ""
 SUPABASE_ANON_KEY: ""
-SUPABASE_DB_URL: "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable"
