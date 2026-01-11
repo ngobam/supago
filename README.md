@@ -7,6 +7,8 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Go-1.21+-00ADD8?logo=go&logoColor=white" />
   <img src="https://img.shields.io/badge/Supabase-Ready-3ECF8E?logo=supabase&logoColor=white" />
+  <br/>
+  <i>Under Construction</i>
 </p>
 
 
