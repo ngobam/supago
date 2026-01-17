@@ -233,28 +233,20 @@ func pgToGoType(pgType string, nullable bool) string {
 	switch pgType {
 	case "uuid", "text", "varchar", "character varying":
 		t = "string"
-
 	case "int2", "int4", "integer", "smallint":
 		t = "int"
-
 	case "int8", "bigint":
 		t = "int64"
-
 	case "bool", "boolean":
 		t = "bool"
-
 	case "timestamp", "timestamp without time zone", "timestamptz", "timestamp with time zone":
 		t = "time.Time"
-
 	case "date":
 		t = "time.Time"
-
 	case "numeric", "decimal", "float4", "float8":
 		t = "float64"
-
 	case "json", "jsonb":
 		t = "map[string]any"
-
 	default:
 		t = "any"
 	}
