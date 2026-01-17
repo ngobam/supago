@@ -75,6 +75,48 @@ func (s *SupabaseQuery) GetTableSchema(tableName *string) (*TableSchemaResult, e
 	return result, nil
 }
 
+func (s *SupabaseQuery) InsertTableSchema(tableName *string, schema []ColumnSchema) error {
+	if tableName == nil || *tableName == "" {
+		return fmt.Errorf("table name cannot be empty")
+	}
+	if len(schema) == 0 {
+		return fmt.Errorf("schema cannot be empty")
+	}
+
+	columns := make([]string, 0, len(schema))
+	for _, col := range schema {
+		columns = append(columns, buildColumns(col))
+	}
+
+	query := fmt.Sprintf(
+		"CREATE TABLE %s (\n  %s\n);",
+		*tableName,
+		strings.Join(columns, ",\n  "),
+	)
+
+	fmt.Printf("Executing Query...\n%s\n", query)
+	_, err := s.ExecuteSQL(query)
+	if err != nil {
+		return fmt.Errorf("failed to insert schema %s, error: %w", *tableName, err)
+	}
+
+	return nil
+}
+
+func buildColumns(c ColumnSchema) string {
+	sql := fmt.Sprintf("%s %s", c.ColumnName, c.DataType)
+
+	if !c.IsNullable {
+		sql += " NOT NULL"
+	}
+
+	if c.ColumnDefault != "" {
+		sql += " DEFAULT " + c.ColumnDefault
+	}
+
+	return sql
+}
+
 func (s *SupabaseQuery) checkSchemaViewExists(tableName *string) (bool, error) {
 	viewName := *tableName + "_schema"
 

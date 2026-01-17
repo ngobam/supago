@@ -11,8 +11,8 @@ import (
 func PullCommands() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "pull <table_name>",
-		Short:   "Pull Supabase table schema",
-		Long:    "Pull table schema from Supabase and display column information",
+		Short:   "Pull table schema from supabase",
+		Long:    "Pull table schema from supabase and display column information",
 		Example: `supago pull profiles`,
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 1 {
