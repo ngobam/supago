@@ -15,7 +15,7 @@ import (
 	"github.com/valyala/fasthttp/reuseport"
 )
 
-var Logger = logger.HcLog().Named("supago.server")
+var Logger = logger.HcLog().Named("server")
 
 type Server struct {
 	Config      *Config
@@ -38,7 +38,7 @@ func NewServer(config *Config) *Server {
 
 func (s *Server) prepareListener() (net.Listener, error) {
 	addr := s.Config.Address()
-	ln, err := reuseport.Listen("tcp", addr) // bind both IPv4 and IPv6
+	ln, err := reuseport.Listen("tcp", addr)
 	if err != nil {
 		Logger.Error("failed to bind address", "err", err)
 		return nil, err

@@ -13,7 +13,7 @@ func PullCommands() *cobra.Command {
 		Use:     "pull <table_name>",
 		Short:   "Pull Supabase table schema",
 		Long:    "Pull table schema from Supabase and display column information",
-		Example: `supago pull blogs`,
+		Example: `supago pull profiles`,
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 1 {
 				return fmt.Errorf("table_name is required\n\nUsage:\n  supago pull <table_name>\n\nExample:\n  supago pull blogs")
