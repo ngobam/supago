@@ -41,13 +41,9 @@ supago/
 │   ├── usecase/
 │   │   └── user_usecase.go
 │   │
-│   ├── repository/
-│   │   ├── user_repository.go
-│   │   └── supabase_user_repo.go
-│   │
-│   └── infra/
-│       └── supabase/
-│           └── client.go
+│   └── repository/
+│      ├── user_repository.go
+│      └── supabase_user_repo.go
 │
 ├── .env
 ├── go.mod

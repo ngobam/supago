@@ -11,8 +11,7 @@ import (
 func Run(name *string) (*query.TableSchemaResult, error) {
 	cfg, err := config.LoadConfig(nil)
 	if err != nil {
-		fmt.Println("Error loading config:", err.Error())
-		return nil, err
+		return nil, fmt.Errorf("load config failed: %w", err)
 	}
 
 	d := drivers.NewSupabase(cfg)
@@ -20,12 +19,10 @@ func Run(name *string) (*query.TableSchemaResult, error) {
 
 	result, err := q.GetTableSchema(name)
 	if err != nil {
-		fmt.Println("fatal: failed to get table schema, error:", err.Error())
-		return nil, err
+		return nil, fmt.Errorf("failed to get table schema: %w", err)
 	}
 
 	if result == nil {
-		fmt.Println("fatal: Record not found")
 		return nil, fmt.Errorf("result is nil")
 	}
 
@@ -47,12 +44,10 @@ func Run(name *string) (*query.TableSchemaResult, error) {
 	return result, nil
 }
 
-// Setup creates all necessary database functions using Management API
 func Setup() error {
 	cfg, err := config.LoadConfig(nil)
 	if err != nil {
-		fmt.Println("Error loading config:", err.Error())
-		return err
+		return fmt.Errorf("load config failed: %w", err)
 	}
 
 	if cfg.SupabaseAccessToken == "" {
@@ -71,14 +66,14 @@ func Setup() error {
 
 	schemaViewExists, err := q.CheckFunctionExistsInDB("get_table_schema")
 	if err != nil {
-		fmt.Printf("⚠️  Warning: Could not check get_table_schema existence: %v\n", err)
+		fmt.Printf("Warning: Could not check get_table_schema existence: %v\n", err)
 		fmt.Println("   Proceeding with setup...")
 		schemaViewExists = false
 	}
 
 	execSqlExists, err := q.CheckFunctionExistsInDB("exec_sql")
 	if err != nil {
-		fmt.Printf("⚠️  Warning: Could not check exec_sql existence: %v\n", err)
+		fmt.Printf("Warning: Could not check exec_sql existence: %v\n", err)
 		fmt.Println("   Proceeding with setup...")
 		execSqlExists = false
 	}
@@ -125,7 +120,6 @@ func Setup() error {
 	return nil
 }
 
-// EnsureFunctions checks if necessary functions exist (lightweight check)
 func EnsureFunctions() error {
 	cfg, err := config.LoadConfig(nil)
 	if err != nil {
@@ -141,7 +135,7 @@ func EnsureFunctions() error {
 	}
 
 	if !exists {
-		fmt.Println("⚠️  Warning: get_table_schema function not found")
+		fmt.Println("Warning: get_table_schema function not found")
 		fmt.Println("   Views will be created using Management API directly")
 		fmt.Println("   Run 'supago pull setup' to create the function")
 	}
@@ -149,7 +143,6 @@ func EnsureFunctions() error {
 	return nil
 }
 
-// CheckSetup verifies if the database is properly set up
 func CheckSetup() error {
 	cfg, err := config.LoadConfig(nil)
 	if err != nil {
@@ -179,7 +172,7 @@ func CheckSetup() error {
 	if err == nil && execExists {
 		fmt.Println("exec_sql function exists")
 	} else {
-		fmt.Println("⚠️  exec_sql function not found (optional)")
+		fmt.Println("exec_sql function not found (optional)")
 	}
 
 	fmt.Println("\nDatabase setup is complete!")
