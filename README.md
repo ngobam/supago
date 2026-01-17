@@ -56,8 +56,7 @@ supago/
 ### Available Command
 ```bash
 go run cmd/main.go help
-```
-```bash
+
 Supago CLI
 
 Usage:
@@ -66,7 +65,8 @@ Usage:
 Available Commands:
   completion  Generate the autocompletion script for the specified shell
   help        Help about any command
-  pull        Pull Supabase Model
+  pull        Pull table schema from supabase
+  push        Push table schema to supabase
   server      Start Supago server
 
 Flags:
@@ -80,7 +80,7 @@ Use "supago [command] --help" for more information about a command.
 go run cmd/main.go server
 ```
 
-### Pull Model
+### Pull Table
 ```bash
 go run cmd/main.go pull -h                                                                          
 
@@ -123,7 +123,7 @@ Columns:
 Generated model: internal/domain/blogs.go
 ```
 
-### Push Model
+### Push Table
 
 ```bash
 go run cmd/main.go push -h
