@@ -15,7 +15,7 @@
 Supago is a CLI tool that provides a proxy layer between your applications and Supabase.
 
 ## Features
-- Execute Query (Database as Code)
+- Execute Query (_Database as Code_)
 - Pull Table Schema from Supabase
 - Push Table Schema to Supabase
 
