@@ -15,8 +15,7 @@ import (
 func Run(name *string) (*query.TableSchemaResult, error) {
 	cfg, err := config.LoadConfig(nil)
 	if err != nil {
-		fmt.Println("Error loading config:", err.Error())
-		return nil, err
+		return nil, fmt.Errorf("load config failed: %w", err)
 	}
 
 	d := drivers.NewSupabase(cfg)
@@ -24,12 +23,10 @@ func Run(name *string) (*query.TableSchemaResult, error) {
 
 	result, err := q.GetTableSchema(name)
 	if err != nil {
-		fmt.Println("fatal: failed to get table schema, error:", err.Error())
-		return nil, err
+		return nil, fmt.Errorf("failed to get table schema: %w", err)
 	}
 
 	if result == nil {
-		fmt.Println("fatal: Record not found")
 		return nil, fmt.Errorf("result is nil")
 	}
 
@@ -44,8 +41,7 @@ func Run(name *string) (*query.TableSchemaResult, error) {
 func Setup() error {
 	cfg, err := config.LoadConfig(nil)
 	if err != nil {
-		fmt.Println("Error loading config:", err.Error())
-		return err
+		return fmt.Errorf("load config failed: %w", err)
 	}
 
 	if cfg.SupabaseAccessToken == "" {
