@@ -108,13 +108,20 @@ Flags:
 ```bash
 go run cmd/main.go pull profiles                                                                    
 
-Table: profiles
+Table: Blogs
 Columns:
-  • id                   uuid            NOT NULL   default: -
-  • username             text            NULL       default: -
-  • full_name            text            NULL       default: -
-  • avatar_url           text            NULL       default: -
-  • bio                  text            NULL       default: -
-  • created_at           timestamp with time zone NULL       default: now()
-  • updated_at           timestamp with time zone NULL       default: now()
+  • id                   bigint          NOT NULL   default: -
+  • title                character varying NULL       default: -
+  • description          text            NULL       default: -
+  • content              text            NULL       default: -
+  • tags                 character varying NULL       default: -
+  • status               character varying NULL       default: -
+  • category             character varying NULL       default: -
+  • created_at           timestamp with time zone NOT NULL   default: now()
+  • author_id            uuid            NULL       default: -
+  • date                 date            NULL       default: -
+  • type                 character varying NULL       default: -
+  • thumbnail            character varying NULL       default: -
+
+Generated model: internal/domain/blogs.go
 ```

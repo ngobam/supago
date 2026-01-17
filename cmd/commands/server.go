@@ -10,9 +10,7 @@ func ServeCommands() *cobra.Command {
 		Use:   "server",
 		Short: "Start Supago server",
 		Long:  "Start Supago server",
-		Run: func(cmd *cobra.Command, args []string) {
-			_ = cmd // unused
-
+		Run: func(_ *cobra.Command, args []string) {
 			server.Run()
 
 			select {}

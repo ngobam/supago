@@ -2,3 +2,4 @@ go.sum
 *.exe
 app.yaml
 .vscode
+internal/domain/*.go

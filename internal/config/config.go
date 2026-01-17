@@ -14,11 +14,10 @@ type Config struct {
 	SupabaseProjectId        string `mapstructure:"SUPABASE_PROJECT_ID"`
 	SupabaseApiKey           string `mapstructure:"SUPABASE_API_KEY"`
 	SupabaseAnonKey          string `mapstructure:"SUPABASE_ANON_KEY"`
-	SupabaseAccessToken      string `mapstructure:"SUPABASE_ACCESS_TOKEN"` // Tambah ini
+	SupabaseAccessToken      string `mapstructure:"SUPABASE_ACCESS_TOKEN"`
 	MaxServerRequestBodySize int    `mapstructure:"MAX_SERVER_REQUEST_BODY_SIZE"`
 }
 
-// LoadConfig reads configuration from a YAML file and returns a Config object.
 func LoadConfig(path *string) (*Config, error) {
 	v := viper.New()
 

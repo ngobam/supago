@@ -61,7 +61,6 @@ func (s *Supabase) Read() ([]byte, error) {
 	return commit(req)
 }
 
-// Write executes a POST request
 func (s *Supabase) Write() ([]byte, error) {
 	var reqBody io.Reader
 
@@ -121,7 +120,6 @@ func (s *Supabase) Delete() ([]byte, error) {
 	return commit(req)
 }
 
-// ExecuteSQL executes raw SQL via Management API
 func (s *Supabase) ExecuteSQL(query string) ([]byte, error) {
 	url := fmt.Sprintf("%s/database/query", s.Config.SupabaseManagementUrl())
 
@@ -139,14 +137,12 @@ func (s *Supabase) ExecuteSQL(query string) ([]byte, error) {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
 
-	// Use Personal Access Token for Management API
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", s.Config.SupabaseAccessToken))
 	req.Header.Set("Content-Type", "application/json")
 
 	return commit(req)
 }
 
-// commit executes the HTTP request and returns the response body
 func commit(req *http.Request) ([]byte, error) {
 	client := &http.Client{}
 	resp, err := client.Do(req)

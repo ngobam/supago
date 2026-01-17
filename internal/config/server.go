@@ -15,7 +15,7 @@ import (
 	"github.com/valyala/fasthttp/reuseport"
 )
 
-var Logger = logger.HcLog().Named("supago.server")
+var Logger = logger.HcLog().Named("server")
 
 type Server struct {
 	Config      *Config
@@ -23,7 +23,6 @@ type Server struct {
 	ShutdownFns []func(ctx context.Context) error
 }
 
-// --- create new server ---
 func NewServer(config *Config) *Server {
 	return &Server{
 		Config: config,
@@ -37,10 +36,9 @@ func NewServer(config *Config) *Server {
 	}
 }
 
-// --- prepare listener with graceful shutdown ---
 func (s *Server) prepareListener() (net.Listener, error) {
 	addr := s.Config.Address()
-	ln, err := reuseport.Listen("tcp", addr) // bind both IPv4 and IPv6
+	ln, err := reuseport.Listen("tcp", addr)
 	if err != nil {
 		Logger.Error("failed to bind address", "err", err)
 		return nil, err
@@ -49,26 +47,21 @@ func (s *Server) prepareListener() (net.Listener, error) {
 	return gracefulLn, nil
 }
 
-// --- run server in goroutine ---
 func (s *Server) runHttpServer(listener net.Listener, errChan chan error) {
 	Logger.Info("server is running", "address", s.Config.Address())
 	errChan <- s.HttpServer.Serve(listener)
 }
 
-// --- main Run method ---
 func (s *Server) RunHttpServer() {
 	listener, err := s.prepareListener()
 	if err != nil {
 		os.Exit(1)
 	}
 
-	// Error channel
 	errChan := make(chan error, 1)
 
-	// Start server in goroutine
 	go s.runHttpServer(listener, errChan)
 
-	// Handle OS signals
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 
@@ -92,7 +85,6 @@ func (s *Server) RunHttpServer() {
 	}
 }
 
-// --- call shutdown functions if any ---
 func (s *Server) gracefulShutdown() {
 	Logger.Info("running shutdown functions")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -105,7 +97,6 @@ func (s *Server) gracefulShutdown() {
 	}
 }
 
-// --- GracefulListener similar to Raiden ---
 type GracefulListener struct {
 	ln          net.Listener
 	maxWaitTime time.Duration

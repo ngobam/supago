@@ -31,7 +31,6 @@ func NewTableSchemaQuery(d *drivers.Supabase) *SupabaseQuery {
 	}
 }
 
-// Helper method untuk clone instance dengan headers
 func (sq *SupabaseQuery) clone() *SupabaseQuery {
 	newHeaders := make(map[string]string)
 	for k, v := range sq.Headers {
@@ -94,7 +93,6 @@ func (s *SupabaseQuery) checkSchemaViewExists(tableName *string) (bool, error) {
 	return true, nil
 }
 
-// createSchemaView creates a view for table schema using Management API
 func (s *SupabaseQuery) createSchemaView(tableName *string) error {
 	viewName := *tableName + "_schema"
 
@@ -119,10 +117,8 @@ GRANT SELECT ON public.%s TO anon, authenticated;
 		return fmt.Errorf("failed to create view via Management API: %w", err)
 	}
 
-	// Parse response
 	var result []map[string]interface{}
 	if err := json.Unmarshal(body, &result); err != nil {
-		// Management API might return different response format
 		fmt.Println("View creation response:", string(body))
 	}
 
@@ -148,7 +144,6 @@ func (s *SupabaseQuery) getSchemaFromView(tableName *string) ([]ColumnSchema, er
 }
 
 func (s *SupabaseQuery) GetAllTableSchemas() ([]TableSchemaResult, error) {
-	// Get all table names from information_schema.tables
 	sq := s.clone()
 	body, err := sq.From("information_schema.tables").
 		Select("table_name").
@@ -182,7 +177,6 @@ func (s *SupabaseQuery) GetAllTableSchemas() ([]TableSchemaResult, error) {
 	return results, nil
 }
 
-// DropSchemaView drops a schema view if it exists using Management API
 func (s *SupabaseQuery) DropSchemaView(tableName *string) error {
 	viewName := *tableName + "_schema"
 
@@ -197,18 +191,14 @@ func (s *SupabaseQuery) DropSchemaView(tableName *string) error {
 	return nil
 }
 
-// RefreshSchemaView recreates the schema view
 func (s *SupabaseQuery) RefreshSchemaView(tableName *string) error {
 	if err := s.DropSchemaView(tableName); err != nil {
 		return err
 	}
 
-	// Recreate view
 	return s.createSchemaView(tableName)
 }
 
-// GetTableSchemaViaRPC gets schema using RPC function (alternative method)
-// This requires the get_table_schema RPC function to be created in Supabase
 func (s *SupabaseQuery) GetTableSchemaViaRPC(tableName *string) (*TableSchemaResult, error) {
 	params := map[string]interface{}{
 		"p_table_name": *tableName,
@@ -228,8 +218,6 @@ func (s *SupabaseQuery) GetTableSchemaViaRPC(tableName *string) (*TableSchemaRes
 	return &result, nil
 }
 
-// GetAllTableSchemasViaRPC gets all schemas using RPC function (alternative method)
-// This requires the get_all_table_schemas RPC function to be created in Supabase
 func (s *SupabaseQuery) GetAllTableSchemasViaRPC() ([]TableSchemaResult, error) {
 	sq := s.clone()
 	body, err := sq.RPC("get_all_table_schemas", nil).Write()
@@ -245,7 +233,6 @@ func (s *SupabaseQuery) GetAllTableSchemasViaRPC() ([]TableSchemaResult, error) 
 	return results, nil
 }
 
-// GetTableInfo gets basic table information without creating views
 func (s *SupabaseQuery) GetTableInfo(tableName *string) (*TableSchemaResult, error) {
 	if tableName == nil || *tableName == "" {
 		return nil, fmt.Errorf("table name cannot be empty")
@@ -295,8 +282,6 @@ func (s *SupabaseQuery) GetTableInfo(tableName *string) (*TableSchemaResult, err
 	return result, nil
 }
 
-// CheckFunctionExists checks if a given RPC function exists (legacy method)
-// Note: This is unreliable and kept for backward compatibility
 func (s *SupabaseQuery) CheckFunctionExists(functionName string) (bool, error) {
 	params := map[string]interface{}{}
 	sq := s.clone()
@@ -304,14 +289,11 @@ func (s *SupabaseQuery) CheckFunctionExists(functionName string) (bool, error) {
 	if err != nil && strings.Contains(err.Error(), "Could not find the function") {
 		return false, nil
 	} else if err != nil {
-		// Other error, assume function exists or network issue
 		return true, nil
 	}
 	return true, nil
 }
 
-// CheckFunctionExistsInDB checks if a function exists by querying pg_catalog
-// This is the recommended way to check function existence
 func (s *SupabaseQuery) CheckFunctionExistsInDB(functionName string) (bool, error) {
 	query := fmt.Sprintf(`
 		SELECT COUNT(*) > 0 as exists
@@ -336,7 +318,6 @@ func (s *SupabaseQuery) CheckFunctionExistsInDB(functionName string) (bool, erro
 	}
 
 	if len(body) == 0 || string(body) == "null" || string(body) == "[]" {
-		// exec_sql exists but returns void, fallback to Management API
 		return s.checkFunctionViaManagementAPI(functionName)
 	}
 
@@ -352,9 +333,7 @@ func (s *SupabaseQuery) CheckFunctionExistsInDB(functionName string) (bool, erro
 	return false, nil
 }
 
-// checkFunctionViaManagementAPI checks function existence via Management API
 func (s *SupabaseQuery) checkFunctionViaManagementAPI(functionName string) (bool, error) {
-	// Try a simpler approach: list all functions and check if ours exists
 	query := `
 		SELECT p.proname as function_name
 		FROM pg_catalog.pg_proc p
@@ -389,7 +368,6 @@ func (s *SupabaseQuery) checkFunctionViaManagementAPI(functionName string) (bool
 	return false, nil
 }
 
-// CreateTableSchemaFunction creates the create_table_schema_view function using Management API
 func (s *SupabaseQuery) CreateTableSchemaFunction() error {
 	sq := s.clone()
 	body, err := sq.ExecuteSQL(function.GetTableSchemaSQL)
@@ -401,7 +379,6 @@ func (s *SupabaseQuery) CreateTableSchemaFunction() error {
 	return nil
 }
 
-// CreateExecSQLFunction creates exec_sql function using Management API
 func (s *SupabaseQuery) CreateExecSQLFunction() error {
 	sq := s.clone()
 	body, err := sq.ExecuteSQL(function.ExecSQL)
@@ -413,7 +390,6 @@ func (s *SupabaseQuery) CreateExecSQLFunction() error {
 	return nil
 }
 
-// InitializeDatabase creates all necessary functions and views
 func (s *SupabaseQuery) InitializeDatabase() error {
 	fmt.Println("Initializing database functions...")
 
@@ -429,7 +405,6 @@ func (s *SupabaseQuery) InitializeDatabase() error {
 	return nil
 }
 
-// InitializeDatabaseSelective creates only missing database functions
 func (s *SupabaseQuery) InitializeDatabaseSelective(schemaViewExists, execSqlExists bool) error {
 	if !execSqlExists {
 		if err := s.CreateExecSQLFunction(); err != nil {

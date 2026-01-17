@@ -5,13 +5,11 @@ import (
 )
 
 func (s *Supabase) From(tableName string) *Supabase {
-	// Reset URL to REST API base
 	baseUrl := s.Config.SupabaseUrl()
 	s.Url = fmt.Sprintf("%s/rest/v1/%s", baseUrl, tableName)
 	return s
 }
 
-// Select adds select parameter to the URL
 func (s *Supabase) Select(columns string) *Supabase {
 	if s.Url == "" {
 		return s
@@ -26,7 +24,6 @@ func (s *Supabase) Select(columns string) *Supabase {
 	return s
 }
 
-// Eq adds equality filter
 func (s *Supabase) Eq(column, value string) *Supabase {
 	if s.Url == "" {
 		return s
@@ -41,7 +38,6 @@ func (s *Supabase) Eq(column, value string) *Supabase {
 	return s
 }
 
-// Neq adds not equal filter
 func (s *Supabase) Neq(column, value string) *Supabase {
 	if s.Url == "" {
 		return s
@@ -56,7 +52,6 @@ func (s *Supabase) Neq(column, value string) *Supabase {
 	return s
 }
 
-// Gt adds greater than filter
 func (s *Supabase) Gt(column, value string) *Supabase {
 	if s.Url == "" {
 		return s
@@ -71,7 +66,6 @@ func (s *Supabase) Gt(column, value string) *Supabase {
 	return s
 }
 
-// Lt adds less than filter
 func (s *Supabase) Lt(column, value string) *Supabase {
 	if s.Url == "" {
 		return s
@@ -86,7 +80,6 @@ func (s *Supabase) Lt(column, value string) *Supabase {
 	return s
 }
 
-// Order adds ordering
 func (s *Supabase) Order(column string, ascending bool) *Supabase {
 	if s.Url == "" {
 		return s
@@ -106,7 +99,6 @@ func (s *Supabase) Order(column string, ascending bool) *Supabase {
 	return s
 }
 
-// Limit adds limit
 func (s *Supabase) Limit(limit int) *Supabase {
 	if s.Url == "" {
 		return s
@@ -121,7 +113,6 @@ func (s *Supabase) Limit(limit int) *Supabase {
 	return s
 }
 
-// Offset adds offset
 func (s *Supabase) Offset(offset int) *Supabase {
 	if s.Url == "" {
 		return s
@@ -136,26 +127,22 @@ func (s *Supabase) Offset(offset int) *Supabase {
 	return s
 }
 
-// Insert inserts data and returns the query for execution
 func (s *Supabase) Insert(data interface{}) *Supabase {
 	s.Payload = data
 	return s
 }
 
-// Upsert inserts or updates data
 func (s *Supabase) Upsert(data interface{}) *Supabase {
 	s.Payload = data
 	s.AddHeader("Prefer", "resolution=merge-duplicates")
 	return s
 }
 
-// Single ensures only one row is returned
 func (s *Supabase) Single() *Supabase {
 	s.AddHeader("Accept", "application/vnd.pgrst.object+json")
 	return s
 }
 
-// RPC calls a Supabase RPC function via REST API
 func (s *Supabase) RPC(functionName string, params interface{}) *Supabase {
 	baseUrl := s.Config.SupabaseUrl()
 	s.Url = fmt.Sprintf("%s/rest/v1/rpc/%s", baseUrl, functionName)
@@ -164,7 +151,6 @@ func (s *Supabase) RPC(functionName string, params interface{}) *Supabase {
 	return s
 }
 
-// Helper function to check if string contains substring
 func contains(s, substr string) bool {
 	return len(s) >= len(substr) && (s == substr || len(s) > len(substr) &&
 		(func() bool {
