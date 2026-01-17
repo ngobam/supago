@@ -31,8 +31,7 @@ func Run(name *string) (*query.TableSchemaResult, error) {
 	}
 
 	if err := generateStructModel(result); err != nil {
-		fmt.Println("fatal: failed to generate struct model, error:", err.Error())
-		return nil, err
+		return nil, fmt.Errorf("failed to generate struct model, error: %w", err)
 	}
 
 	return result, nil

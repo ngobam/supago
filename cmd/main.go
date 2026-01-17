@@ -4,19 +4,12 @@ import (
 	"os"
 
 	"github.com/rosfandy/supago/cmd/commands"
-	"github.com/spf13/cobra"
 )
 
 func main() {
-	rootCmd := &cobra.Command{
-		Use:   "supago",
-		Short: "Supago CLI",
-	}
+	cmd := commands.InitCommands()
 
-	rootCmd.AddCommand(commands.ServeCommands())
-	rootCmd.AddCommand(commands.PullCommands())
-
-	if err := rootCmd.Execute(); err != nil {
+	if err := cmd.Execute(); err != nil {
 		os.Exit(1)
 	}
 }

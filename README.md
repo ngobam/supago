@@ -16,7 +16,8 @@ Supago is a CLI tool that provides a proxy layer between your applications and S
 
 ## Features
 - Execute Query (Database as Code)
-- Pull Supabase Table Schema
+- Pull Table Schema from Supabase
+- Push Table Schema to Supabase
 
 ## Project Structure
 ```md
@@ -121,3 +122,32 @@ Columns:
 
 Generated model: internal/domain/blogs.go
 ```
+
+### Push Model
+
+```bash
+go run cmd/main.go push -h
+
+Push table schema to supabase
+
+Usage:
+  supago push <table_name> [flags]
+
+Flags:
+  -h, --help          help for push
+      --path string   Directory for table schema (default "internal/domain")
+```
+
+```bash
+go run cmd/main.go push examples 
+
+Executing Query...
+CREATE TABLE Examples (
+  id BIGINT NOT NULL,
+  name TEXT NOT NULL,
+  created_at TIMESTAMP NOT NULL,
+  updated_at TIMESTAMP NOT NULL
+);
+table 'examples' pushed successfully
+```
+
