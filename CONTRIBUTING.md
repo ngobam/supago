@@ -48,7 +48,7 @@ cd supago
 Create a new branch for your work:
 
 ```bash
-git checkout -b feature/your-feature-name
+git checkout -b feat/your-feature-name
 ```
 
 Recommended branch naming:
