@@ -2,4 +2,4 @@ go.sum
 *.exe
 app.yaml
 .vscode
-internal/domain/*.go
+# internal/domain/*.go
