@@ -11,7 +11,6 @@
   <i>Under Construction</i>
 </p>
 
-
 ## Introduction
 Supago is a CLI tool that provides a proxy layer between your applications and Supabase.
 
