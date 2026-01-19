@@ -6,24 +6,31 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/Go-1.21+-00ADD8?logo=go&logoColor=white" />
-  <img src="https://img.shields.io/badge/Supabase-Ready-3ECF8E?logo=supabase&logoColor=white" />
-  <br/>
-  <i>Under Construction</i>
+  <img src="https://img.shields.io/badge/Status-Under%20Construction-yellow" />
+  <!-- <img src="https://img.shields.io/github/license/ngobam/supago" /> -->
+  <!-- <img src="https://img.shields.io/github/actions/workflow/status/ngobam/supago/ci.yml?label=CI" /> -->
+  <!-- <img src="https://img.shields.io/github/issues/ngobam/supago" /> -->
+  <!-- <img src="https://img.shields.io/github/issues-pr/ngobam/supago" /> -->
+  <img src="https://img.shields.io/badge/Changelog-Available-blue" />
+  <img src="https://img.shields.io/github/last-commit/ngobam/supago" />
+  <!-- <img src="https://img.shields.io/badge/Supabase-Ready-3ECF8E?logo=supabase&logoColor=white" /> -->
 </p>
+
+
 
 ## Introduction
 Supago is a CLI tool that provides a proxy layer between your applications and Supabase.
 
 ## Features
-- Execute Query (_Database as Code_)
-- Pull Table Schema from Supabase
-- Push Table Schema to Supabase
+- Execute database queries using a **Database as Code** workflow
+- Pull existing table schemas from Supabase for version control
+- Push schema changes to Supabase programmatically
+- REST API for automation and integration
 
 ## Project Structure
 ```md
 supago/
-│
-├── api/
+│── api/
 │   └── http/
 │       ├── routes/
 │       ├── handler/
@@ -34,29 +41,30 @@ supago/
 │
 ├── internal/
 │   ├── config/
-│   │   └── config.go
-│   │
 │   ├── domain/
-│   │   └── user.go
-│   │
 │   ├── usecase/
-│   │   └── user_usecase.go
-│   │
 │   └── repository/
-│      ├── user_repository.go
-│      └── supabase_user_repo.go
+│
+├── pkg/ 
+│   ├──cli/
+│   ├──logger/
+│   ├──supabase/
 │
 ├── .env
 ├── go.mod
 └── README.md
-
 ```
+| Directory  | Layer | Description |
+|-----------|-------|-------------|
+| `api/` | API / Transport Layer | Contains the transport layer of the application (REST and GraphQL). This layer is responsible only for handling requests and responses. |
+| `cmd/` | Application Entry Point | Contains the application entry point (`main.go`). Responsible for bootstrapping the application. |
+| `internal/` | Core / Business Layer | Core business logic of the application (domain, usecase, repository, configuration). Packages inside `internal` **cannot be imported by external projects**. |
+| `pkg/` | Shared / Reusable Libraries | Reusable packages that can be imported by other projects or tools. |
+
 
 ## Run
 ### Available Command
 ```bash
-go run cmd/main.go help
-
 Supago CLI
 
 Usage:
