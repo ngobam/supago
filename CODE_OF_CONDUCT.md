@@ -1,4 +1,4 @@
-# Code of Conduct
+    # Code of Conduct
 
 Supago is a open-source project built by the community.
 We want this to be a friendly and safe space for everyone to learn, discuss, and contribute.
