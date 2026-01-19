@@ -53,7 +53,7 @@ git checkout -b feat/your-feature-name
 
 Recommended branch naming:
 - `feat/...`
-- `fix/...`
+- `bug/...`
 - `docs/...`
 
 ---
@@ -76,9 +76,9 @@ Write clear and meaningful commit messages.
 
 Examples:
 ```text
-[Fix][Modules]: handle missing config file
-[Feat][Modules]: support table schema command
-[Docs]: improve installation guide
+[Bug][Modules] handle missing config file
+[Feat][Modules] support table schema command
+[Docs] improve installation guide
 ```
 
 Avoid messages like:
