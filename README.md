@@ -56,7 +56,7 @@ supago/
 ```
 | Directory  | Layer | Description |
 |-----------|-------|-------------|
-| `api/` | API / Transport Layer | Contains the transport layer of the application (REST and GraphQL). This layer is responsible only for handling requests and responses. |
+| `api/` | API / Transport Layer | Contains the transport layer of the application (REST). This layer is responsible only for handling requests and responses. |
 | `cmd/` | Application Entry Point | Contains the application entry point (`main.go`). Responsible for bootstrapping the application. |
 | `internal/` | Core / Business Layer | Core business logic of the application (domain, usecase, repository, configuration). Packages inside `internal` **cannot be imported by external projects**. |
 | `pkg/` | Shared / Reusable Libraries | Reusable packages that can be imported by other projects or tools. |
